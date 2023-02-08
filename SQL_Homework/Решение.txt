@@ -1,4 +1,4 @@
-Задания: 
+/* Задания: 
 Задача 1. 
 Скачать БД AdventureWorks (OLTP) со страницы https://docs.microsoft.com/en-us/sql/samples/adventureworks-install-configure
 Восстановить бэкап на SQL сервер в виртуальной машине
@@ -41,9 +41,9 @@
 входные параметры - две даты, с и по 
 выходной параметр - количество найденных записей 
 Результирующий набор содержит записи всех холостых мужчин-сотрудников, родившихся в диапазон указанных дат
-
-Решения:
-2 TASK
+*/
+-- Решения:
+-- 2 TASK
 Select DATEPART(YYYY,OrderDate) AS Year,
 DATENAME(MONTH,OrderDate) As Month,
 SUM(TotalDue) AS 'Total Sales'
@@ -51,7 +51,7 @@ FROM Sales.SalesOrderHeader
 Group by DATEPART(YYYY,OrderDate),DATENAME(MONTH,OrderDate)
 Order by DATEPART(YYYY,OrderDate);
 
-3 TASK
+-- 3 TASK
 select distinct top 10 pa2.City as 'Город' , count(sc.CustomerID) as 'Приоритет'
 from Sales.Store as ss
 inner join Sales.Customer AS sc ON ss.BusinessEntityID=sc.StoreID
@@ -64,7 +64,7 @@ where ss.Name='Remarkable Bike Store'
 Group by pa2.City
 Order by count(CustomerID) desc;
 
-4 Task
+-- 4 Task
 Select LastName as 'Фамилия покупателя',FirstName 'Имя покупателя',
 pp.Name 'Название продукта',
 sod.OrderQty 'Количество купленных экземпляров'from Person.Person
@@ -76,7 +76,7 @@ inner join Production.Product as pp ON pp.ProductID=sod.ProductID
 where (sod.OrderQty>15)
 order by sod.OrderQty DESC,FirstName;
 
-5 TASK 
+-- 5 TASK 
 Select soh.OrderDate as 'Дата заказа', LastName as 'Фамилия покупателя' ,FirstName as 'Имя покупателя',
 STUFF(
 (Select
@@ -97,7 +97,7 @@ inner join Sales.SalesOrderDetail as sod ON sod.SalesOrderID=soh.SalesOrderID
 inner join Production.Product as pp ON pp.ProductID=sod.ProductID
 ;
 
-6 TASK
+-- 6 TASK
 Select
 concat(pp2.LastName,'.', concat('',
 (select LEFT(pp2.FirstName, 1)),
@@ -122,7 +122,7 @@ empl2.OrganizationLevel=1 and empl2.BirthDate>empl.BirthDate and empl2.HireDate>
 and d.DepartmentID=d2.DepartmentID
 ;
 
-7 TASK
+-- 7 TASK
 GO
 Create Procedure SearchSingleMan
 @dateFrom DATE,
