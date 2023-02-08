@@ -1,0 +1,102 @@
+2 TASK
+Select DATEPART(YYYY,OrderDate) AS Year,
+DATENAME(MONTH,OrderDate) As Month,
+SUM(TotalDue) AS 'Total Sales'
+FROM Sales.SalesOrderHeader
+Group by DATEPART(YYYY,OrderDate),DATENAME(MONTH,OrderDate)
+Order by DATEPART(YYYY,OrderDate);
+
+3 TASK
+select distinct top 10 pa2.City as 'Город' , count(sc.CustomerID) as 'Приоритет'
+from Sales.Store as ss
+inner join Sales.Customer AS sc ON ss.BusinessEntityID=sc.StoreID
+inner join Sales.SalesTerritoryHistory AS ssth ON ssth.TerritoryID=sc.TerritoryID
+inner join Person.BusinessEntityAddress AS bea ON bea.BusinessEntityID=ssth.BusinessEntityID
+inner join Person.Address AS pa ON pa.AddressID=bea.AddressID
+inner join Person.BusinessEntityAddress AS bea2 ON bea2.BusinessEntityID=ss.BusinessEntityID
+inner join Person.Address AS pa2 ON pa2.AddressID!=bea2.AddressID
+where ss.Name='Remarkable Bike Store'
+Group by pa2.City
+Order by count(CustomerID) desc;
+
+4 Task
+Select LastName as 'Фамилия покупателя',FirstName 'Имя покупателя',
+pp.Name 'Название продукта',
+sod.OrderQty 'Количество купленных экземпляров'from Person.Person
+inner join Sales.Customer as sc
+ON BusinessEntityID=PersonID
+inner join Sales.SalesOrderHeader as soh ON sc.CustomerID=soh.CustomerID
+inner join Sales.SalesOrderDetail as sod ON sod.SalesOrderID=soh.SalesOrderID
+inner join Production.Product as pp ON pp.ProductID=sod.ProductID
+where (sod.OrderQty>15)
+order by sod.OrderQty DESC,FirstName;
+
+5 TASK 
+Select soh.OrderDate as 'Дата заказа', LastName as 'Фамилия покупателя' ,FirstName as 'Имя покупателя',
+STUFF(
+(Select
+','+ CONCAT('<',pp.Name, N'> Количество <', sod.OrderQty,N'> шт.')
+FROM Sales.SalesOrderHeader as soh2
+where soh2.SalesOrderID=soh.SalesOrderID
+FOR XML PATH (''))
+, 1, 1, '') as 'Содержимое заказа'
+FROM Person.Person
+inner join Sales.Customer as sc ON BusinessEntityID=PersonID
+inner join Sales.SalesOrderHeader as soh ON soh.CustomerID=sc.CustomerID
+inner join (
+select soh.CustomerID,min(soh.OrderDate) AS first_order_date
+FROM
+Sales.SalesOrderHeader as soh
+Group by soh.CustomerID) x ON sc.CustomerID=x.CustomerID AND soh.OrderDate=x.first_order_date
+inner join Sales.SalesOrderDetail as sod ON sod.SalesOrderID=soh.SalesOrderID
+inner join Production.Product as pp ON pp.ProductID=sod.ProductID
+;
+
+6 TASK
+Select
+concat(pp2.LastName,'.', concat('',
+(select LEFT(pp2.FirstName, 1)),
+(select LEFT(pp2.MiddleName, 1))
+)) AS 'Имя руководителя',
+empl2.HireDate as 'Дата приема руководителя на работу',
+empl2.BirthDate as 'Дата рождения руководителя',
+concat(pp.LastName,'.', concat('',
+(select LEFT(pp.FirstName, 1)),
+(select LEFT(pp.MiddleName, 1))
+)) as 'Имя сотрудника'
+,empl.HireDate as 'Дата приема сотрудника на работу',
+empl.BirthDate as 'Дата рождения сотрудника'
+FROM Person.Person as pp
+inner join HumanResources.Employee as empl ON pp.BusinessEntityID=empl.BusinessEntityID
+inner join HumanResources.EmployeeDepartmentHistory as d on d.BusinessEntityID=empl.BusinessEntityID
+inner join Person.Person as pp2 ON pp2.BusinessEntityID!=empl.BusinessEntityID
+inner join HumanResources.Employee as empl2 ON empl2.BusinessEntityID=pp2.BusinessEntityID
+inner join HumanResources.EmployeeDepartmentHistory as d2 on d2.BusinessEntityID=empl2.BusinessEntityID
+where empl.OrganizationLevel>1 and
+empl2.OrganizationLevel=1 and empl2.BirthDate>empl.BirthDate and empl2.HireDate>empl.HireDate
+and d.DepartmentID=d2.DepartmentID
+;
+
+7 TASK
+GO
+Create Procedure SearchSingleMan
+@dateFrom DATE,
+@dateTo DATE,
+@result int output
+AS
+BEGIN
+Select empl.BusinessEntityID,LastName,FirstName,empl.BirthDate,empl.JobTitle
+from Person.Person AS pp
+Inner join HumanResources.Employee as empl ON empl.BusinessEntityID=pp.BusinessEntityID
+where BirthDate<@dateTo and BirthDate>@dateFrom and Gender='M' and MaritalStatus='S' ;
+Select @result=Count(*)
+from Person.Person AS pp
+Inner join HumanResources.Employee as empl ON empl.BusinessEntityID=pp.BusinessEntityID
+where BirthDate<@dateTo and BirthDate>@dateFrom
+and Gender='M' and MaritalStatus='S';
+END;
+--вызов процедуры
+Declare @resultTable int
+EXEC SearchSingleMan16 '1965-01-01' ,'1975-01-01',@resultTable output;
+PRINT N'Количество найденных записей: '
+PRINT @resultTable;

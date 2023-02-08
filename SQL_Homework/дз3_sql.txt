@@ -1,0 +1,56 @@
+— Задача 1
+DECLARE @StartTime datetime2 = '2010-08-30 16:27';
+
+SELECT TOP(5000) wl.SessionID, wl.ServerID, wl.UserName
+FROM Marketing.WebLog AS wl
+WHERE wl.SessionStart > @StartTime or wl.SessionStart = @StartTime;
+GO
+
+Create nonclustered index index1 on Marketing.WebLog(SessionStart) include (serverID,SessionID,UserName);
+
+— Задача 2
+SELECT PostalCode, Country
+FROM Marketing.PostalCode
+WHERE StateCode = 'KY';
+GO
+Create nonclustered index index1 on Marketing.PostalCode(StateCode) include (Country,PostalCode);
+
+— Задача 3
+DECLARE @Counter INT = 0;
+WHILE @Counter < 350
+BEGIN
+SELECT p.LastName, p.FirstName
+FROM Marketing.Prospect AS p
+INNER JOIN Marketing.Salesperson AS sp
+ON p.LastName = sp.LastName
+ORDER BY p.FirstName;
+
+SELECT *
+FROM Marketing.Prospect AS p
+WHERE p.LastName = 'Smith';
+SET @Counter += 1;
+END;
+
+Create nonclustered index index1 on Marketing.Prospect(LastName);
+--Создать временные таблицы 
+
+— Задача 4
+SELECT
+c.CategoryName,
+sc.SubcategoryName,
+pm.ProductModel,
+COUNT(p.ProductID) AS ModelCount
+FROM Marketing.ProductModel pm
+JOIN Marketing.Product p
+ON p.ProductModelID = pm.ProductModelID
+JOIN Marketing.Subcategory sc
+ON sc.SubcategoryID = p.SubcategoryID
+JOIN Marketing.Category c
+ON c.CategoryID = sc.CategoryID
+GROUP BY c.CategoryName,
+sc.SubcategoryName,
+pm.ProductModel
+HAVING COUNT(p.ProductID) > 1
+
+Create index index1 on Marketing.Product (SubcategoryID)
+include (ProductModelId);
