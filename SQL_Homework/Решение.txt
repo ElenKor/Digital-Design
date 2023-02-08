@@ -1,3 +1,4 @@
+Задания: 
 Задача 1. 
 Скачать БД AdventureWorks (OLTP) со страницы https://docs.microsoft.com/en-us/sql/samples/adventureworks-install-configure
 Восстановить бэкап на SQL сервер в виртуальной машине
@@ -41,6 +42,7 @@
 выходной параметр - количество найденных записей 
 Результирующий набор содержит записи всех холостых мужчин-сотрудников, родившихся в диапазон указанных дат
 
+Решения:
 2 TASK
 Select DATEPART(YYYY,OrderDate) AS Year,
 DATENAME(MONTH,OrderDate) As Month,
